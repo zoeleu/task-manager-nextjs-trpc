@@ -42,34 +42,36 @@ export default function CreateTaskForm() {
         <form onSubmit={handleSubmit}>
             {error && <p className="text-red-600">{error}</p>}
 
-            <label htmlFor="title-input">Title:</label>
+            <label>
+                Title:
+                <input
+                    type="text"
+                    name="title"
+                    minLength={1}
+                    required={true}
+                    placeholder="e.g., Review Q3 marketing brief"
+                    value={title}
+                    onChange={(ev) => setTitle(ev.currentTarget.value)}
+                />
+            </label>
             {fieldErrors?.fieldErrors.title?.[0] && (
                 <p className="text-sm text-red-600">{fieldErrors.fieldErrors.title[0]}</p>
             )}
-            <input
-                type="text"
-                id="title-input"
-                name="title"
-                minLength={1}
-                required={true}
-                placeholder="e.g., Review Q3 marketing brief"
-                value={title}
-                onChange={(ev) => setTitle(ev.currentTarget.value)}
-            />
 
-            <label htmlFor="description-input">Description:</label>
+            <label>
+                Description:
+                <input
+                    type="text"
+                    name="description"
+                    required={false}
+                    placeholder="e.g., Add action items from the client feedback email"
+                    value={description}
+                    onChange={(ev) => setDescription(ev.currentTarget.value)}
+                />
+            </label>
             {fieldErrors?.fieldErrors.description?.[0] && (
                 <p className="text-sm text-red-600">{fieldErrors.fieldErrors.description[0]}</p>
             )}
-            <input
-                type="text"
-                name="description"
-                id="description-input"
-                required={false}
-                placeholder="e.g., Add action items from the client feedback email"
-                value={description}
-                onChange={(ev) => setDescription(ev.currentTarget.value)}
-            />
 
             <button disabled={createTask.isPending} type="submit">Create</button>
         </form>
