@@ -7,7 +7,7 @@ import { tasks } from '@/server/store';
  * through tRPC. It's used, for example, to hold data about user
  * authentication, or about our database connection.
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = async (_opts: { headers: Headers }) => {
     // This is where we would implement a mechanism to authenticate
     // requests, for a more complete application.
     return { tasks };
