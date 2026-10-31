@@ -8,7 +8,7 @@ export default function Home() {
   return (
     <div>
       <h1>Tasks</h1>
-      <Link href="/create">
+      <Link href="/tasks/new">
         Create task
       </Link>
       <hr />

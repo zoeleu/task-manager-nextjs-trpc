@@ -4,7 +4,8 @@ import type { Task as TaskData } from "@/lib/task-schema"
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface TaskProps {
@@ -43,6 +44,9 @@ function Task(props: TaskProps) {
                     {description && <p className="text-sm text-gray-500">{description}</p>}
                 </div>
             </label>
+            <Link href={`/tasks/${id}`} aria-label={`Edit "${title}"`}>
+                <Pencil className="h-4 w-4" />
+            </Link>
             <button
                 type="button"
                 onClick={handleDelete}

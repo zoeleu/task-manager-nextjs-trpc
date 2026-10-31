@@ -1,25 +1,34 @@
 "use client";
 
-import { createTaskInput, type CreateTaskInput } from "@/lib/task-schema";
+import { createTaskInput, type CreateTaskInput, type Task } from "@/lib/task-schema";
 import { useTRPC } from "@/trpc/client";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { z } from "zod";
 
-export default function CreateTaskForm() {
-    const [title, setTitle] = useState<string>("");
-    const [description, setDescription] = useState<string>("");
+interface TaskFormProps {
+    // When given, the form edits this task instead of creating a new one.
+    task?: Task
+}
+
+export default function TaskForm(props: TaskFormProps) {
+    const [title, setTitle] = useState<string>(props.task?.title ?? "");
+    const [description, setDescription] = useState<string>(props.task?.description ?? "");
     const [error, setError] = useState<string | undefined>();
     const [fieldErrors, setFieldErrors] = useState<z.core.$ZodFlattenedError<CreateTaskInput>>()
     const trpc = useTRPC();
     const router = useRouter();
 
-
     const createTask = useMutation(trpc.createTask.mutationOptions({
         onSuccess: () => router.push("/"),
         onError: (error) => setError(error.message),
     }));
+    const updateTask = useMutation(trpc.updateTask.mutationOptions({
+        onSuccess: () => router.push("/"),
+        onError: (error) => setError(error.message),
+    }));
+    const isPending = createTask.isPending || updateTask.isPending;
 
     function handleSubmit(ev: React.SubmitEvent<HTMLFormElement>) {
         ev.preventDefault();
@@ -35,7 +44,12 @@ export default function CreateTaskForm() {
         }
         setFieldErrors(undefined);
 
-        createTask.mutate(result.data);
+        // An empty description is sent as `undefined`, which clears it when editing.
+        if (props.task) {
+            updateTask.mutate({ id: props.task.id, ...result.data });
+        } else {
+            createTask.mutate(result.data);
+        }
     }
 
     return (
@@ -73,7 +87,7 @@ export default function CreateTaskForm() {
                 <p className="text-sm text-red-600">{fieldErrors.fieldErrors.description[0]}</p>
             )}
 
-            <button disabled={createTask.isPending} type="submit">Create</button>
+            <button disabled={isPending} type="submit">{props.task ? "Save" : "Create"}</button>
         </form>
     )
 }
