@@ -35,12 +35,14 @@ function Task(props: TaskProps) {
     }
 
     return (
-        <label className="flex items-start gap-3 py-2">
-            <input type="checkbox" checked={completed} onChange={handleCheckbox} className="mt-1" />
-            <div className={completed ? "text-gray-400 line-through" : ""}>
-                <p>{title}</p>
-                {description && <p className="text-sm text-gray-500">{description}</p>}
-            </div>
+        <div className="flex items-start gap-3 py-2">
+            <label className="flex flex-1 items-start gap-3">
+                <input type="checkbox" checked={completed} onChange={handleCheckbox} className="mt-1" />
+                <div className={completed ? "text-gray-400 line-through" : ""}>
+                    <p>{title}</p>
+                    {description && <p className="text-sm text-gray-500">{description}</p>}
+                </div>
+            </label>
             <button
                 type="button"
                 onClick={handleDelete}
@@ -49,7 +51,7 @@ function Task(props: TaskProps) {
             >
                 <Trash className="h-4 w-4" />
             </button>
-        </label>
+        </div>
     )
 }
 
