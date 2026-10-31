@@ -8,14 +8,20 @@ import { TRPCError } from '@trpc/server';
 
 export const appRouter = createTRPCRouter({
     getTask: baseProcedure
-        .output(taskWithoutId.optional())
+        .output(taskWithoutId)
         .input(
             z.object({
                 id: taskId
             })
         )
         .query((opts) => {
-            return tasks.get(opts.input.id);
+            const existing = tasks.get(opts.input.id);
+            if (!existing)
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: `Task with id ${opts.input.id} not found.`
+                })
+            return existing;
         }),
     listTasks: baseProcedure
         .output(z.array(task))
@@ -77,7 +83,12 @@ export const appRouter = createTRPCRouter({
         )
         .output(z.boolean())
         .mutation((opts) => {
-            return tasks.delete(opts.input.id);
+            if (!tasks.delete(opts.input.id))
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: `Task with id ${opts.input.id} not found.`
+                })
+            return true;
         })
 });
 

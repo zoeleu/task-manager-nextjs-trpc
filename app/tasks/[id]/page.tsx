@@ -6,6 +6,7 @@ import Spinner from "@/components/Spinner";
 import TaskForm from "@/components/TaskForm";
 import { taskId } from "@/lib/task-schema";
 import { caller } from "@/trpc/server";
+import { TRPCError } from "@trpc/server";
 
 export default function TaskPage({ params }: PageProps<"/tasks/[id]">) {
     return (
@@ -37,8 +38,10 @@ async function TaskFormLoader({ id }: { id: string }) {
     const parsedId = taskId.safeParse(id);
     if (!parsedId.success) notFound();
 
-    const task = await caller.getTask({ id: parsedId.data });
-    if (!task) notFound();
+    const task = await caller.getTask({ id: parsedId.data }).catch((error) => {
+        if (error instanceof TRPCError && error.code === "NOT_FOUND") notFound();
+        throw error;
+    });
 
     return (
         <>
