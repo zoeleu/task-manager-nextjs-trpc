@@ -83,6 +83,11 @@ function Task(props: TaskProps) {
                     </button>
                 </div>
             </div>
+            {updateTask.error && (
+                <p role="alert" className="mt-1 pl-7 text-sm text-red-600">
+                    Couldn&apos;t update this task: {updateTask.error.message}
+                </p>
+            )}
             {deleteTask.error && (
                 <p role="alert" className="mt-1 pl-7 text-sm text-red-600">
                     Couldn&apos;t delete this task: {deleteTask.error.message}
