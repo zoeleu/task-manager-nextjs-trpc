@@ -36,25 +36,32 @@ function Task(props: TaskProps) {
     }
 
     return (
-        <div className="flex items-start gap-3 py-2">
-            <label className="flex flex-1 items-start gap-3">
-                <input type="checkbox" checked={completed} onChange={handleCheckbox} className="mt-1" />
-                <div className={completed ? "text-gray-400 line-through" : ""}>
+        <div className="flex items-start gap-3 px-4 py-3">
+            <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
+                <input type="checkbox" checked={completed} onChange={handleCheckbox} className="mt-1 size-4 shrink-0 accent-blue-600" />
+                <div className={`min-w-0 break-words ${completed ? "text-zinc-400 line-through" : ""}`}>
                     <p>{title}</p>
-                    {description && <p className="text-sm text-gray-500">{description}</p>}
+                    {description && <p className="mt-0.5 text-sm text-zinc-500">{description}</p>}
                 </div>
             </label>
-            <Link href={`/tasks/${id}`} aria-label={`Edit "${title}"`}>
-                <Pencil className="h-4 w-4" />
-            </Link>
-            <button
-                type="button"
-                onClick={handleDelete}
-                disabled={deleteTask.isPending}
-                aria-label={`Delete "${title}"`}
-            >
-                <Trash className="h-4 w-4" />
-            </button>
+            <div className="flex shrink-0 gap-1">
+                <Link
+                    href={`/tasks/${id}`}
+                    aria-label={`Edit "${title}"`}
+                    className="rounded-md p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+                >
+                    <Pencil className="size-4" />
+                </Link>
+                <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleteTask.isPending}
+                    aria-label={`Delete "${title}"`}
+                    className="rounded-md p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-950"
+                >
+                    <Trash className="size-4" />
+                </button>
+            </div>
         </div>
     )
 }
