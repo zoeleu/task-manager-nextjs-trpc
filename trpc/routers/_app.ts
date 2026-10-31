@@ -55,7 +55,7 @@ export const appRouter = createTRPCRouter({
         .input(
             z.object({
                 id: taskId,
-            }).extend(taskWithoutId.partial().shape)
+            }).extend(taskWithoutId.omit({ createdAt: true }).partial().shape)
         )
         .output(task)
         .mutation((opts) => {
