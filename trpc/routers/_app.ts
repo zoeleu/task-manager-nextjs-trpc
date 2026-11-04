@@ -24,19 +24,22 @@ export const appRouter = createTRPCRouter({
             return existing;
         }),
     listTasks: baseProcedure
-        .output(z.array(task))
-        .query((opts) => {
-            const tasks = Array.from(
-                opts.ctx.tasks
-                    .entries()
-                    .map(v => {
-                        return {
-                            id: v[0],
-                            ...v[1]
-                        }
-                    })
-            )
-            return tasks;
+        .input(z.object({
+            limit: z.number().int().min(1).max(100).default(20),
+            cursor: taskId.nullish(),
+        }))
+        .output(z.object({ items: z.array(task), nextCursor: taskId.nullish() }))
+        .query(({ ctx, input }) => {
+            // Compare IDs rather than looking up the cursor: pagination still works
+            // if the task at the previous page boundary has been deleted.
+            const candidates = Array.from(ctx.tasks, ([id, value]) => ({ ...value, id }))
+                .sort((a, b) => a.id.localeCompare(b.id))
+                .filter(value => !input.cursor || value.id > input.cursor);
+            const items = candidates.slice(0, input.limit);
+            return {
+                items,
+                nextCursor: candidates.length > input.limit ? items.at(-1)?.id : undefined,
+            };
         }),
     createTask: baseProcedure
         .input(createTaskInput)
