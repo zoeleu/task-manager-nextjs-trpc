@@ -1,5 +1,7 @@
 # Task Manager
 
+[Leia em português (Brasil)](README.pt-BR.md)
+
 A simple task manager built with Next.js and tRPC. Tasks are kept in memory on the server and exposed through a tRPC API.
 
 ## Running it
