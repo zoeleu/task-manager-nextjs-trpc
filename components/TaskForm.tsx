@@ -2,7 +2,7 @@
 
 import { createTaskInput, type CreateTaskInput, type Task } from "@/lib/task-schema";
 import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -22,13 +22,22 @@ export default function TaskForm(props: TaskFormProps) {
     const [fieldErrors, setFieldErrors] = useState<z.core.$ZodFlattenedError<CreateTaskInput>>()
     const trpc = useTRPC();
     const router = useRouter();
+    const queryClient = useQueryClient();
+    async function returnToList() {
+        // Refresh even an inactive list before navigating back to its cached pages.
+        await queryClient.invalidateQueries({
+            queryKey: trpc.listTasks.pathKey(),
+            refetchType: "all",
+        });
+        router.push("/");
+    }
 
     const createTask = useMutation(trpc.createTask.mutationOptions({
-        onSuccess: () => router.push("/"),
+        onSuccess: returnToList,
         onError: (error) => setError(error.message),
     }));
     const updateTask = useMutation(trpc.updateTask.mutationOptions({
-        onSuccess: () => router.push("/"),
+        onSuccess: returnToList,
         onError: (error) => setError(error.message),
     }));
     const isPending = createTask.isPending || updateTask.isPending;

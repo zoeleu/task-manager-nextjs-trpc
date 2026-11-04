@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // The type of each task, containing basic information.
 export const taskWithoutId = z.object({
-    title: z.string().max(80).min(1),
+    title: z.string().trim().min(1, 'Title is required.').max(80),
     description: z.string().min(1).max(300).optional(),
     createdAt: z.date(),
     completed: z.boolean()
