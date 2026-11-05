@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const configuracaoNext: NextConfig = {
+  /* Configuração da aplicação. */
   experimental: {
     agentFeedback: true,
   },
@@ -17,4 +17,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default configuracaoNext;
