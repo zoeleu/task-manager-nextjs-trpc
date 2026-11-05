@@ -25,7 +25,7 @@ export const roteadorAplicacao = criarRoteadorTRPC({
         }),
     listarTarefas: procedimentoBase
         .input(z.object({
-            limite: z.number().int().min(1).max(100).default(20),
+            limite: z.number().int().min(1).max(100).default(30),
             cursor: idTarefa.nullish(),
         }))
         .output(z.object({ itens: z.array(tarefa), proximoCursor: idTarefa.nullish() }))

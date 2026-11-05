@@ -54,7 +54,7 @@ Cada tarefa tem `id` (UUIDv7 gerado pelo servidor), `titulo` (obrigatório, de 1
 
 ## Decisões de implementação
 
-- **Listagem renderizada no servidor.** `componentes/Tarefas.tsx` chama o roteador diretamente por meio de `chamador`, sem uma requisição HTTP adicional. O conteúdo é transmitido dentro de um `<Suspense>` com indicador de carregamento. As primeiras 20 tarefas iniciam uma consulta paginada; um `IntersectionObserver` carrega as próximas páginas ao rolar a tela. Há também um botão manual e uma opção para tentar novamente em caso de falha. A paginação por cursor UUIDv7 continua funcionando se a tarefa na divisa entre páginas for excluída.
+- **Listagem renderizada no servidor.** `componentes/Tarefas.tsx` chama o roteador diretamente por meio de `chamador`, sem uma requisição HTTP adicional. O conteúdo é transmitido dentro de um `<Suspense>` com indicador de carregamento. As primeiras 30 tarefas iniciam uma consulta paginada; um `IntersectionObserver` carrega as próximas páginas quando o fim da lista chega a 1vh da borda inferior da área visível. A distância acompanha o redimensionamento da janela. Há também um botão manual e uma opção para tentar novamente em caso de falha. A paginação por cursor UUIDv7 continua funcionando se a tarefa na divisa entre páginas for excluída.
 - **Um schema para cliente e servidor.** `lib/schema-tarefa.ts` valida as entradas no tRPC e no formulário, mantendo as regras consistentes.
 - **Criação e edição compartilham página e formulário.** `/tarefas/nova` cria uma tarefa e `/tarefas/<id>` edita uma existente.
 - **Retorno visual.** Erros de validação aparecem abaixo dos campos; erros do servidor, no início do formulário. A exclusão é confirmada acima da lista. As mutações invalidam o cache da consulta paginada para atualizar as páginas carregadas. Falhas ao excluir ou atualizar aparecem abaixo da tarefa.
@@ -68,3 +68,7 @@ Cada tarefa tem `id` (UUIDv7 gerado pelo servidor), `titulo` (obrigatório, de 1
 - **Não implementado:** autenticação.
 
 > Esta versão altera os nomes dos procedimentos e campos da API e substitui as rotas `/tasks/*` por `/tarefas/*`. Clientes da API devem ser atualizados em conjunto.
+
+## Versão com código em português
+
+A branch [`refactor/portugues-completo`](https://github.com/zoeleu/task-manager-nextjs-trpc/tree/refactor/portugues-completo) contém a interface, os nomes de componentes e arquivos, os campos e procedimentos da API, as rotas, os comentários e os testes em português. Os nomes exigidos pelas bibliotecas permanecem no formato original.
