@@ -11,7 +11,7 @@ type PaginaTarefa = inferRouterOutputs<RoteadorAplicacao>["listarTarefas"];
 
 export default function TarefasInfinitas({ primeiraPagina }: { primeiraPagina: PaginaTarefa }) {
     const trpc = usarTRPC();
-    const marcador = useRef<HTMLDivElement>(null);
+    const ultimaTarefa = useRef<HTMLLIElement>(null);
     const [aviso, definirAviso] = useState("");
     const consulta = useInfiniteQuery(trpc.listarTarefas.infiniteQueryOptions(
         { limite: 30 },
@@ -25,8 +25,11 @@ export default function TarefasInfinitas({ primeiraPagina }: { primeiraPagina: P
     ));
     const { fetchNextPage: carregarProximaPagina, hasNextPage: temProximaPagina, isFetching: carregando, isError: temErro } = consulta;
 
+    const tarefas = consulta.data.pages.flatMap(pagina => pagina.itens);
+    const idUltimaTarefa = tarefas.at(-1)?.id;
+
     useEffect(() => {
-        if (!marcador.current || !temProximaPagina || carregando || temErro ||
+        if (!ultimaTarefa.current || !temProximaPagina || carregando || temErro ||
             typeof IntersectionObserver === "undefined") return;
         let observador: IntersectionObserver;
         const observar = () => {
@@ -34,10 +37,11 @@ export default function TarefasInfinitas({ primeiraPagina }: { primeiraPagina: P
             observador = new IntersectionObserver(([entrada]) => {
                 if (entrada.isIntersecting) void carregarProximaPagina({ cancelRefetch: false });
             }, {
-                // rootMargin aceita pixels, então convertemos 1vh e recalculamos ao redimensionar.
+                // Carrega quando o topo da última tarefa chega a 1vh abaixo da janela.
+                // rootMargin aceita pixels: recalculamos ao redimensionar.
                 rootMargin: `0px 0px ${window.innerHeight / 100}px 0px`,
             });
-            observador.observe(marcador.current!);
+            observador.observe(ultimaTarefa.current!);
         };
         observar();
         window.addEventListener("resize", observar);
@@ -45,9 +49,7 @@ export default function TarefasInfinitas({ primeiraPagina }: { primeiraPagina: P
             observador.disconnect();
             window.removeEventListener("resize", observar);
         };
-    }, [carregarProximaPagina, temProximaPagina, carregando, temErro]);
-
-    const tarefas = consulta.data.pages.flatMap(pagina => pagina.itens);
+    }, [carregarProximaPagina, temProximaPagina, carregando, temErro, idUltimaTarefa]);
 
     return (
         <div>
@@ -59,13 +61,12 @@ export default function TarefasInfinitas({ primeiraPagina }: { primeiraPagina: P
             ) : (
                 <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
                     {tarefas.map(tarefa => (
-                        <li key={tarefa.id}>
+                        <li key={tarefa.id} ref={tarefa.id === idUltimaTarefa ? ultimaTarefa : undefined}>
                             <Tarefa tarefa={tarefa} aoExcluir={() => definirAviso(`Tarefa excluída: “${tarefa.titulo}”.`)} />
                         </li>
                     ))}
                 </ul>
             )}
-            <div ref={marcador} className="h-px" aria-hidden="true" />
             {temErro && (
                 <p role="alert" className="mt-3 text-sm text-red-600">
                     Não foi possível carregar as tarefas: {consulta.error.message}
