@@ -25,7 +25,7 @@ export const appRouter = createTRPCRouter({
         }),
     listTasks: baseProcedure
         .input(z.object({
-            limit: z.number().int().min(1).max(100).default(20),
+            limit: z.number().int().min(1).max(100).default(30),
             cursor: taskId.nullish(),
         }))
         .output(z.object({ items: z.array(task), nextCursor: taskId.nullish() }))
