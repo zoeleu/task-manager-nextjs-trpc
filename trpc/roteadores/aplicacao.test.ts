@@ -15,12 +15,12 @@ async function preencher(quantidade: number) {
     return resultado;
 }
 
-test("pagina 45 tarefas sem duplicatas e encerra na última página", async () => {
-    const criadas = await preencher(45);
+test("pagina 65 tarefas sem duplicatas e encerra na última página", async () => {
+    const criadas = await preencher(65);
     const primeira = await chamador.listarTarefas({});
     const segunda = await chamador.listarTarefas({ cursor: primeira.proximoCursor });
     const terceira = await chamador.listarTarefas({ cursor: segunda.proximoCursor });
-    assert.deepEqual([primeira.itens.length, segunda.itens.length, terceira.itens.length], [20, 20, 5]);
+    assert.deepEqual([primeira.itens.length, segunda.itens.length, terceira.itens.length], [30, 30, 5]);
     assert.equal(terceira.proximoCursor, undefined);
     assert.deepEqual([...primeira.itens, ...segunda.itens, ...terceira.itens].map(t => t.id), criadas.map(t => t.id).sort());
 });
@@ -37,9 +37,9 @@ test("continua após excluir o cursor e tarefas anteriores", async () => {
 
 test("trata páginas vazias e com o tamanho exato", async () => {
     assert.deepEqual(await chamador.listarTarefas({}), { itens: [], proximoCursor: undefined });
-    await preencher(20);
+    await preencher(30);
     const pagina = await chamador.listarTarefas({});
-    assert.equal(pagina.itens.length, 20);
+    assert.equal(pagina.itens.length, 30);
     assert.equal(pagina.proximoCursor, undefined);
 });
 

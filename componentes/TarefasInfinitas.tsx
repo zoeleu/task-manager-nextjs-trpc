@@ -14,7 +14,7 @@ export default function TarefasInfinitas({ primeiraPagina }: { primeiraPagina: P
     const marcador = useRef<HTMLDivElement>(null);
     const [aviso, definirAviso] = useState("");
     const consulta = useInfiniteQuery(trpc.listarTarefas.infiniteQueryOptions(
-        { limite: 20 },
+        { limite: 30 },
         {
             getNextPageParam: pagina => pagina.proximoCursor,
             // Revalida ao voltar, inclusive se o Next reutilizar uma página pré-carregada.
@@ -28,11 +28,23 @@ export default function TarefasInfinitas({ primeiraPagina }: { primeiraPagina: P
     useEffect(() => {
         if (!marcador.current || !temProximaPagina || carregando || temErro ||
             typeof IntersectionObserver === "undefined") return;
-        const observador = new IntersectionObserver(([entrada]) => {
-            if (entrada.isIntersecting) void carregarProximaPagina({ cancelRefetch: false });
-        }, { rootMargin: "200px" });
-        observador.observe(marcador.current);
-        return () => observador.disconnect();
+        let observador: IntersectionObserver;
+        const observar = () => {
+            observador?.disconnect();
+            observador = new IntersectionObserver(([entrada]) => {
+                if (entrada.isIntersecting) void carregarProximaPagina({ cancelRefetch: false });
+            }, {
+                // rootMargin aceita pixels, então convertemos 1vh e recalculamos ao redimensionar.
+                rootMargin: `0px 0px ${window.innerHeight / 100}px 0px`,
+            });
+            observador.observe(marcador.current!);
+        };
+        observar();
+        window.addEventListener("resize", observar);
+        return () => {
+            observador.disconnect();
+            window.removeEventListener("resize", observar);
+        };
     }, [carregarProximaPagina, temProximaPagina, carregando, temErro]);
 
     const tarefas = consulta.data.pages.flatMap(pagina => pagina.itens);
@@ -53,7 +65,7 @@ export default function TarefasInfinitas({ primeiraPagina }: { primeiraPagina: P
                     ))}
                 </ul>
             )}
-            <div ref={marcador} className="h-1" aria-hidden="true" />
+            <div ref={marcador} className="h-px" aria-hidden="true" />
             {temErro && (
                 <p role="alert" className="mt-3 text-sm text-red-600">
                     Não foi possível carregar as tarefas: {consulta.error.message}
