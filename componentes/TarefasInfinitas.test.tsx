@@ -21,4 +21,6 @@ test("renderiza a primeira página do servidor no HTML antes dos efeitos do nave
     assert.match(html, /Tarefa renderizada no servidor/);
     assert.match(html, /Carregar mais|Carregando…/);
     assert.doesNotMatch(html, /Nenhuma tarefa ainda/);
+    assert.equal((html.match(/<li\b/g) ?? []).length, 1);
+    assert.doesNotMatch(html, /class="h-px"/);
 });

@@ -18,8 +18,8 @@ async function preencher(quantidade: number) {
 test("pagina 65 tarefas sem duplicatas e encerra na última página", async () => {
     const criadas = await preencher(65);
     const primeira = await chamador.listarTarefas({});
-    const segunda = await chamador.listarTarefas({ cursor: primeira.proximoCursor });
-    const terceira = await chamador.listarTarefas({ cursor: segunda.proximoCursor });
+    const segunda = await chamador.listarTarefas({ limite: 30, cursor: primeira.proximoCursor });
+    const terceira = await chamador.listarTarefas({ limite: 30, cursor: segunda.proximoCursor });
     assert.deepEqual([primeira.itens.length, segunda.itens.length, terceira.itens.length], [30, 30, 5]);
     assert.equal(terceira.proximoCursor, undefined);
     assert.deepEqual([...primeira.itens, ...segunda.itens, ...terceira.itens].map(t => t.id), criadas.map(t => t.id).sort());
