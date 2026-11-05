@@ -1,13 +1,13 @@
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
-import { createTRPCContext } from '@/trpc/init';
-import { appRouter } from '@/trpc/routers/_app';
+import { criarContextoTRPC } from '@/trpc/inicializacao';
+import { roteadorAplicacao } from '@/trpc/roteadores/aplicacao';
 
-const handler = (req: Request) =>
+const tratarRequisicao = (req: Request) =>
     fetchRequestHandler({
         endpoint: '/api/trpc',
         req,
-        router: appRouter,
-        createContext: () => createTRPCContext({ headers: req.headers }),
+        router: roteadorAplicacao,
+        createContext: () => criarContextoTRPC({ headers: req.headers }),
     });
 
-export { handler as GET, handler as POST };
+export { tratarRequisicao as GET, tratarRequisicao as POST };

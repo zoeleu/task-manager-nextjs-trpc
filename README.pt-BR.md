@@ -25,44 +25,46 @@ Para gerar e executar a versão de produção: `bun run build && bun start`.
 
 ```text
 app/
-  page.tsx                 Listagem de tarefas renderizada no servidor
-  tasks/[id]/page.tsx      Formulário de criação (/tasks/new) e edição (/tasks/<id>)
-  api/trpc/[trpc]/route.ts Endpoint HTTP do tRPC
-components/
-  Tasks.tsx                Carrega a primeira página no servidor
-  InfiniteTasks.tsx        Carrega as próximas páginas ao rolar a tela
-  Task.tsx                 Uma tarefa: concluir, editar e excluir
-  TaskForm.tsx             Formulário compartilhado de criação e edição
-lib/task-schema.ts         Schemas Zod compartilhados entre cliente e servidor
-server/store.ts            Armazenamento em memória (um Map)
-trpc/                      Configuração do tRPC, roteador, contexto e utilitários
+  page.tsx                   Listagem renderizada no servidor
+  tarefas/[id]/page.tsx       Formulário de criação e edição
+  api/trpc/[trpc]/route.ts    Endpoint HTTP do tRPC
+componentes/
+  Tarefas.tsx                 Carrega a primeira página no servidor
+  TarefasInfinitas.tsx        Carrega as próximas páginas ao rolar a tela
+  Tarefa.tsx                  Uma tarefa: concluir, editar e excluir
+  FormularioTarefa.tsx        Formulário de criação e edição
+lib/schema-tarefa.ts           Schemas Zod compartilhados
+servidor/armazenamento.ts      Armazenamento em memória (um Map)
+trpc/                         Roteador, contexto e utilitários
 ```
 
 ### API tRPC
 
-Os procedimentos estão em `trpc/routers/_app.ts`.
+Os procedimentos estão em `trpc/roteadores/aplicacao.ts`.
 
 | Procedimento | Tipo | Entrada | Erros |
 | --- | --- | --- | --- |
-| `listTasks` | query | `{ limit?, cursor? }` → `{ items, nextCursor }` | `BAD_REQUEST` |
-| `getTask` | query | `{ id }` | `NOT_FOUND` |
-| `createTask` | mutation | `{ title, description? }` | `BAD_REQUEST` (por exemplo, título vazio) |
-| `updateTask` | mutation | `{ id, title?, description?, completed? }` | `NOT_FOUND`, `BAD_REQUEST` |
-| `deleteTask` | mutation | `{ id }` | `NOT_FOUND` |
+| `listarTarefas` | query | `{ limite?, cursor? }` → `{ itens, proximoCursor }` | `BAD_REQUEST` |
+| `obterTarefa` | query | `{ id }` | `NOT_FOUND` |
+| `criarTarefa` | mutation | `{ titulo, descricao? }` | `BAD_REQUEST` (por exemplo, título vazio) |
+| `atualizarTarefa` | mutation | `{ id, titulo?, descricao?, concluida? }` | `NOT_FOUND`, `BAD_REQUEST` |
+| `excluirTarefa` | mutation | `{ id }` | `NOT_FOUND` |
 
-Cada tarefa tem `id` (UUIDv7 gerado pelo servidor), `title` (obrigatório, de 1 a 80 caracteres), `description` (opcional, até 300 caracteres), `createdAt` e `completed`. O título perde os espaços nas pontas antes da validação; títulos vazios ou compostos apenas por espaços são rejeitados.
+Cada tarefa tem `id` (UUIDv7 gerado pelo servidor), `titulo` (obrigatório, de 1 a 80 caracteres), `descricao` (opcional, até 300 caracteres), `dataCriacao` e `concluida`. O título perde os espaços nas pontas antes da validação; títulos vazios ou compostos apenas por espaços são rejeitados.
 
 ## Decisões de implementação
 
-- **Listagem renderizada no servidor.** `components/Tasks.tsx` chama o roteador diretamente por meio de `caller`, sem uma requisição HTTP adicional. O conteúdo é transmitido dentro de um `<Suspense>` com indicador de carregamento. As primeiras 20 tarefas iniciam uma consulta paginada; um `IntersectionObserver` carrega as próximas páginas ao rolar a tela. Há também um botão manual e uma opção para tentar novamente em caso de falha. A paginação por cursor UUIDv7 continua funcionando se a tarefa na divisa entre páginas for excluída.
-- **Um schema para cliente e servidor.** `lib/task-schema.ts` valida as entradas no tRPC e no formulário, mantendo as regras consistentes.
-- **Criação e edição compartilham página e formulário.** `/tasks/new` cria uma tarefa e `/tasks/<id>` edita uma existente.
+- **Listagem renderizada no servidor.** `componentes/Tarefas.tsx` chama o roteador diretamente por meio de `chamador`, sem uma requisição HTTP adicional. O conteúdo é transmitido dentro de um `<Suspense>` com indicador de carregamento. As primeiras 20 tarefas iniciam uma consulta paginada; um `IntersectionObserver` carrega as próximas páginas ao rolar a tela. Há também um botão manual e uma opção para tentar novamente em caso de falha. A paginação por cursor UUIDv7 continua funcionando se a tarefa na divisa entre páginas for excluída.
+- **Um schema para cliente e servidor.** `lib/schema-tarefa.ts` valida as entradas no tRPC e no formulário, mantendo as regras consistentes.
+- **Criação e edição compartilham página e formulário.** `/tarefas/nova` cria uma tarefa e `/tarefas/<id>` edita uma existente.
 - **Retorno visual.** Erros de validação aparecem abaixo dos campos; erros do servidor, no início do formulário. A exclusão é confirmada acima da lista. As mutações invalidam o cache da consulta paginada para atualizar as páginas carregadas. Falhas ao excluir ou atualizar aparecem abaixo da tarefa.
-- **Serialização com superjson.** Preserva valores `Date`, como `createdAt`, na comunicação entre servidor e cliente.
+- **Serialização com superjson.** Preserva valores `Date`, como `dataCriacao`, na comunicação entre servidor e cliente.
 - **Armazenamento em `globalThis`.** Evita perder as tarefas a cada recarga de módulo durante o desenvolvimento.
 
 ## Observações
 
 - **Next.js 16.** O enunciado menciona tanto Next.js 15 quanto “versões mais recentes”. Este projeto usa a versão 16.4.3.
-- **Campos em inglês.** O enunciado usa `titulo`, `descricao` e `dataCriacao`; o projeto usa `title`, `description` e `createdAt` para manter o código em um único idioma. O campo `completed` permite marcar tarefas como concluídas.
+- **Código em português.** Componentes, procedimentos tRPC e campos usam nomes em português: `titulo`, `descricao`, `dataCriacao` e `concluida`. Nomes exigidos pelas bibliotecas e pelo Next.js permanecem no formato original. As rotas são `/tarefas/nova` e `/tarefas/<id>`.
 - **Não implementado:** autenticação.
+
+> Esta versão altera os nomes dos procedimentos e campos da API e substitui as rotas `/tasks/*` por `/tarefas/*`. Clientes da API devem ser atualizados em conjunto.
