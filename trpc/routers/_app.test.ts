@@ -18,8 +18,8 @@ async function seed(count: number) {
 test("paginates 65 tasks without duplicates and stops on the final page", async () => {
     const created = await seed(65);
     const first = await caller.listTasks({});
-    const second = await caller.listTasks({ cursor: first.nextCursor });
-    const third = await caller.listTasks({ cursor: second.nextCursor });
+    const second = await caller.listTasks({ limit: 30, cursor: first.nextCursor });
+    const third = await caller.listTasks({ limit: 30, cursor: second.nextCursor });
     assert.deepEqual([first.items.length, second.items.length, third.items.length], [30, 30, 5]);
     assert.equal(third.nextCursor, undefined);
     assert.deepEqual([...first.items, ...second.items, ...third.items].map(t => t.id), created.map(t => t.id).sort());

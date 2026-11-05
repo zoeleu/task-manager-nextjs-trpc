@@ -21,4 +21,6 @@ test("renders the server-supplied first page into HTML before browser effects", 
     assert.match(html, /Server-rendered task/);
     assert.match(html, /Load more|Loading…/);
     assert.doesNotMatch(html, /No tasks yet/);
+    assert.equal((html.match(/<li\b/g) ?? []).length, 1);
+    assert.doesNotMatch(html, /class="h-px"/);
 });

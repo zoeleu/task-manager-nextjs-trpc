@@ -11,7 +11,7 @@ type TaskPage = inferRouterOutputs<AppRouter>["listTasks"];
 
 export default function InfiniteTasks({ firstPage }: { firstPage: TaskPage }) {
     const trpc = useTRPC();
-    const marker = useRef<HTMLDivElement>(null);
+    const lastTask = useRef<HTMLLIElement>(null);
     const [notice, setNotice] = useState("");
     const query = useInfiniteQuery(trpc.listTasks.infiniteQueryOptions(
         { limit: 30 },
@@ -25,8 +25,11 @@ export default function InfiniteTasks({ firstPage }: { firstPage: TaskPage }) {
     ));
     const { fetchNextPage, hasNextPage, isFetching, isError } = query;
 
+    const tasks = query.data.pages.flatMap(page => page.items);
+    const lastTaskId = tasks.at(-1)?.id;
+
     useEffect(() => {
-        if (!marker.current || !hasNextPage || isFetching || isError ||
+        if (!lastTask.current || !hasNextPage || isFetching || isError ||
             typeof IntersectionObserver === "undefined") return;
         let observer: IntersectionObserver;
         const observe = () => {
@@ -34,10 +37,11 @@ export default function InfiniteTasks({ firstPage }: { firstPage: TaskPage }) {
             observer = new IntersectionObserver(([entry]) => {
                 if (entry.isIntersecting) void fetchNextPage({ cancelRefetch: false });
             }, {
-                // rootMargin accepts pixels: convert 1vh and recalculate on resize.
+                // Fetch when the last task's top reaches 1vh below the viewport.
+                // rootMargin accepts pixels: recalculate on resize.
                 rootMargin: `0px 0px ${window.innerHeight / 100}px 0px`,
             });
-            observer.observe(marker.current!);
+            observer.observe(lastTask.current!);
         };
         observe();
         window.addEventListener("resize", observe);
@@ -45,9 +49,7 @@ export default function InfiniteTasks({ firstPage }: { firstPage: TaskPage }) {
             observer.disconnect();
             window.removeEventListener("resize", observe);
         };
-    }, [fetchNextPage, hasNextPage, isFetching, isError]);
-
-    const tasks = query.data.pages.flatMap(page => page.items);
+    }, [fetchNextPage, hasNextPage, isFetching, isError, lastTaskId]);
 
     return (
         <div>
@@ -59,13 +61,12 @@ export default function InfiniteTasks({ firstPage }: { firstPage: TaskPage }) {
             ) : (
                 <ul className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
                     {tasks.map(task => (
-                        <li key={task.id}>
+                        <li key={task.id} ref={task.id === lastTaskId ? lastTask : undefined}>
                             <Task task={task} onDeleted={() => setNotice(`Deleted “${task.title}”.`)} />
                         </li>
                     ))}
                 </ul>
             )}
-            <div ref={marker} className="h-px" aria-hidden="true" />
             {isError && (
                 <p role="alert" className="mt-3 text-sm text-red-600">
                     Couldn&apos;t load tasks: {query.error.message}
