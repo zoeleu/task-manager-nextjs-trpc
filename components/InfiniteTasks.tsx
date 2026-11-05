@@ -14,7 +14,7 @@ export default function InfiniteTasks({ firstPage }: { firstPage: TaskPage }) {
     const marker = useRef<HTMLDivElement>(null);
     const [notice, setNotice] = useState("");
     const query = useInfiniteQuery(trpc.listTasks.infiniteQueryOptions(
-        { limit: 20 },
+        { limit: 30 },
         {
             getNextPageParam: page => page.nextCursor,
             // Revalidate on return, including when Next reuses a prefetched page.
@@ -28,11 +28,23 @@ export default function InfiniteTasks({ firstPage }: { firstPage: TaskPage }) {
     useEffect(() => {
         if (!marker.current || !hasNextPage || isFetching || isError ||
             typeof IntersectionObserver === "undefined") return;
-        const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting) void fetchNextPage({ cancelRefetch: false });
-        }, { rootMargin: "200px" });
-        observer.observe(marker.current);
-        return () => observer.disconnect();
+        let observer: IntersectionObserver;
+        const observe = () => {
+            observer?.disconnect();
+            observer = new IntersectionObserver(([entry]) => {
+                if (entry.isIntersecting) void fetchNextPage({ cancelRefetch: false });
+            }, {
+                // rootMargin accepts pixels: convert 1vh and recalculate on resize.
+                rootMargin: `0px 0px ${window.innerHeight / 100}px 0px`,
+            });
+            observer.observe(marker.current!);
+        };
+        observe();
+        window.addEventListener("resize", observe);
+        return () => {
+            observer.disconnect();
+            window.removeEventListener("resize", observe);
+        };
     }, [fetchNextPage, hasNextPage, isFetching, isError]);
 
     const tasks = query.data.pages.flatMap(page => page.items);
@@ -53,7 +65,7 @@ export default function InfiniteTasks({ firstPage }: { firstPage: TaskPage }) {
                     ))}
                 </ul>
             )}
-            <div ref={marker} className="h-1" aria-hidden="true" />
+            <div ref={marker} className="h-px" aria-hidden="true" />
             {isError && (
                 <p role="alert" className="mt-3 text-sm text-red-600">
                     Couldn&apos;t load tasks: {query.error.message}

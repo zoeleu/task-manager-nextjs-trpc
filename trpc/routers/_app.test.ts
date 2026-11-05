@@ -15,12 +15,12 @@ async function seed(count: number) {
     return result;
 }
 
-test("paginates 45 tasks without duplicates and stops on the final page", async () => {
-    const created = await seed(45);
+test("paginates 65 tasks without duplicates and stops on the final page", async () => {
+    const created = await seed(65);
     const first = await caller.listTasks({});
     const second = await caller.listTasks({ cursor: first.nextCursor });
     const third = await caller.listTasks({ cursor: second.nextCursor });
-    assert.deepEqual([first.items.length, second.items.length, third.items.length], [20, 20, 5]);
+    assert.deepEqual([first.items.length, second.items.length, third.items.length], [30, 30, 5]);
     assert.equal(third.nextCursor, undefined);
     assert.deepEqual([...first.items, ...second.items, ...third.items].map(t => t.id), created.map(t => t.id).sort());
 });
@@ -37,9 +37,9 @@ test("continues after deleting the cursor and earlier tasks", async () => {
 
 test("handles empty and exact-size pages", async () => {
     assert.deepEqual(await caller.listTasks({}), { items: [], nextCursor: undefined });
-    await seed(20);
+    await seed(30);
     const page = await caller.listTasks({});
-    assert.equal(page.items.length, 20);
+    assert.equal(page.items.length, 30);
     assert.equal(page.nextCursor, undefined);
 });
 

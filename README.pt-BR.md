@@ -54,7 +54,7 @@ Cada tarefa tem `id` (UUIDv7 gerado pelo servidor), `title` (obrigatório, de 1 
 
 ## Decisões de implementação
 
-- **Listagem renderizada no servidor.** `components/Tasks.tsx` chama o roteador diretamente por meio de `caller`, sem uma requisição HTTP adicional. O conteúdo é transmitido dentro de um `<Suspense>` com indicador de carregamento. As primeiras 20 tarefas iniciam uma consulta paginada; um `IntersectionObserver` carrega as próximas páginas ao rolar a tela. Há também um botão manual e uma opção para tentar novamente em caso de falha. A paginação por cursor UUIDv7 continua funcionando se a tarefa na divisa entre páginas for excluída.
+- **Listagem renderizada no servidor.** `components/Tasks.tsx` chama o roteador diretamente por meio de `caller`, sem uma requisição HTTP adicional. O conteúdo é transmitido dentro de um `<Suspense>` com indicador de carregamento. As primeiras 30 tarefas iniciam uma consulta paginada; um `IntersectionObserver` carrega as próximas páginas quando o fim da lista chega a 1vh da borda inferior da área visível. A distância acompanha o redimensionamento da janela. Há também um botão manual e uma opção para tentar novamente em caso de falha. A paginação por cursor UUIDv7 continua funcionando se a tarefa na divisa entre páginas for excluída.
 - **Um schema para cliente e servidor.** `lib/task-schema.ts` valida as entradas no tRPC e no formulário, mantendo as regras consistentes.
 - **Criação e edição compartilham página e formulário.** `/tasks/new` cria uma tarefa e `/tasks/<id>` edita uma existente.
 - **Retorno visual.** Erros de validação aparecem abaixo dos campos; erros do servidor, no início do formulário. A exclusão é confirmada acima da lista. As mutações invalidam o cache da consulta paginada para atualizar as páginas carregadas. Falhas ao excluir ou atualizar aparecem abaixo da tarefa.
@@ -66,3 +66,9 @@ Cada tarefa tem `id` (UUIDv7 gerado pelo servidor), `title` (obrigatório, de 1 
 - **Next.js 16.** O enunciado menciona tanto Next.js 15 quanto “versões mais recentes”. Este projeto usa a versão 16.4.3.
 - **Campos em inglês.** O enunciado usa `titulo`, `descricao` e `dataCriacao`; o projeto usa `title`, `description` e `createdAt` para manter o código em um único idioma. O campo `completed` permite marcar tarefas como concluídas.
 - **Não implementado:** autenticação.
+
+## Versão com código em português
+
+A branch [`refactor/portugues-completo`](https://github.com/zoeleu/task-manager-nextjs-trpc/tree/refactor/portugues-completo) contém a interface, os nomes de componentes e arquivos, os campos e procedimentos da API, as rotas, os comentários e os testes em português. Os nomes exigidos pelas bibliotecas permanecem no formato original.
+
+Essa é uma versão alternativa permanente para quem prefere ler o código em português. Ela é mantida separadamente da `main` e não se destina a ser integrada a ela. Para usar essa versão, execute `git switch refactor/portugues-completo`. Mudanças na versão em português devem ter essa branch como destino das PRs.
