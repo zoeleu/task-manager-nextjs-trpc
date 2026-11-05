@@ -72,3 +72,5 @@ Cada tarefa tem `id` (UUIDv7 gerado pelo servidor), `titulo` (obrigatório, de 1
 ## Versão com código em português
 
 A branch [`refactor/portugues-completo`](https://github.com/zoeleu/task-manager-nextjs-trpc/tree/refactor/portugues-completo) contém a interface, os nomes de componentes e arquivos, os campos e procedimentos da API, as rotas, os comentários e os testes em português. Os nomes exigidos pelas bibliotecas permanecem no formato original.
+
+Essa é uma versão alternativa permanente para quem prefere ler o código em português. Ela é mantida separadamente da `main` e não se destina a ser integrada a ela. Para usar essa versão, execute `git switch refactor/portugues-completo`. Mudanças na versão em português devem ter essa branch como destino das PRs.
